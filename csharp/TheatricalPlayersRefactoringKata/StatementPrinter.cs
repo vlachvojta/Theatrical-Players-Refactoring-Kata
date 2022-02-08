@@ -16,17 +16,35 @@ namespace TheatricalPlayersRefactoringKata
 
         public string Print(Invoice invoice, Dictionary<string, Play> plays)
         {
-            var result = string.Format("Statement for {0}\n", invoice.Customer);
+            var result = PrintHeader(invoice);
 
             foreach(var perf in invoice.Performances)
             {
                 result = CalculatePerformace(plays, result, perf);
             }
-            result += String.Format(_cultureInfo, "Amount owed is {0:C}\n", Convert.ToDecimal(totalAmount / 100));
-            result += String.Format("You earned {0} credits\n", volumeCredits);
+            result += PrintAmount();
+            result += PrintCredits();
             return result;
         }
 
+        private string PrintCredits()
+        {
+            return String.Format("You earned {0} credits\n", volumeCredits);
+        }
+
+        private string PrintAmount()
+        {
+            return String.Format(_cultureInfo, "Amount owed is {0:C}\n", Convert.ToDecimal(totalAmount / 100));
+        }
+
+        private static string PrintHeader(Invoice invoice)
+        {
+            return string.Format("Statement for {0}\n", invoice.Customer);
+        }
+        private string PrintSeats(Performance perf, Play play, int thisAmount)
+        {
+            return String.Format(_cultureInfo, "  {0}: {1:C} ({2} seats)\n", play.Name, Convert.ToDecimal(thisAmount / 100), perf.Audience);
+        }
         private string CalculatePerformace(Dictionary<string, Play> plays, string result, Performance perf)
         {
             var play = plays[perf.PlayID];
@@ -36,10 +54,12 @@ namespace TheatricalPlayersRefactoringKata
             thisAmount = CalculateAmount(perf, play);
 
             // print line for this order
-            result += String.Format(_cultureInfo, "  {0}: {1:C} ({2} seats)\n", play.Name, Convert.ToDecimal(thisAmount / 100), perf.Audience);
+            result += PrintSeats(perf, play, thisAmount);
             totalAmount += thisAmount;
             return result;
         }
+
+
 
         private int CalculateAmount(Performance perf, Play play)
         {

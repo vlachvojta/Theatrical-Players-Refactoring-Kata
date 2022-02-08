@@ -6,10 +6,11 @@ namespace TheatricalPlayersRefactoringKata
 {
     public class StatementPrinter
     {
+        private int totalAmount = 0;
+        private int volumeCredits = 0;
+
         public string Print(Invoice invoice, Dictionary<string, Play> plays)
         {
-            var totalAmount = 0;
-            var volumeCredits = 0;
             var result = string.Format("Statement for {0}\n", invoice.Customer);
             CultureInfo cultureInfo = new CultureInfo("en-US");
 
@@ -17,6 +18,10 @@ namespace TheatricalPlayersRefactoringKata
             {
                 var play = plays[perf.PlayID];
                 var thisAmount = 0;
+
+                // add volume credits
+                volumeCredits += Math.Max(perf.Audience - 30, 0);
+
                 switch (play.Type) 
                 {
                     case "tragedy":
@@ -31,14 +36,15 @@ namespace TheatricalPlayersRefactoringKata
                             thisAmount += 10000 + 500 * (perf.Audience - 20);
                         }
                         thisAmount += 300 * perf.Audience;
+                        // add extra credit for every ten comedy attendees
+                        volumeCredits += (int)Math.Floor((decimal)perf.Audience / 5);
                         break;
                     default:
                         throw new Exception("unknown type: " + play.Type);
                 }
-                // add volume credits
-                volumeCredits += Math.Max(perf.Audience - 30, 0);
+
                 // add extra credit for every ten comedy attendees
-                if ("comedy" == play.Type) volumeCredits += (int)Math.Floor((decimal)perf.Audience / 5);
+                // if ("comedy" == play.Type) volumeCredits += (int)Math.Floor((decimal)perf.Audience / 5);
 
                 // print line for this order
                 result += String.Format(cultureInfo, "  {0}: {1:C} ({2} seats)\n", play.Name, Convert.ToDecimal(thisAmount / 100), perf.Audience);
@@ -48,5 +54,10 @@ namespace TheatricalPlayersRefactoringKata
             result += String.Format("You earned {0} credits\n", volumeCredits);
             return result;
         }
+
+        //public string PrintAsHtml(Invoice invoice, Dictionary<string, Play> plays)
+        //{
+        //
+        //}
     }
 }
